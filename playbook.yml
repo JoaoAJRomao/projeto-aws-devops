@@ -1,0 +1,26 @@
+---
+- name: Configurar Servidor Web na EC2
+  hosts: webservers
+  become: yes
+
+  tasks:
+    - name: Atualizar o cache do APT
+      apt:
+        update_cache: yes
+
+    - name: Instalar o Nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Garantir que o Nginx esta ativo e habilitado no boot
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Criar pagina HTML personalizada
+      copy:
+        content: "<h1>Servidor provisionado com Terraform e configurado via Ansible!</h1>"
+        dest: /var/www/html/index.html
+        mode: '0644'
