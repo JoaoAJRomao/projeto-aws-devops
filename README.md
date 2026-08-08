@@ -18,7 +18,123 @@ Este projeto demonstra a infraestrutura como código (IaC) e automação de gere
 - **Acesso SSH Restrito**: O Security Group consulta dinamicamente o IP público do desenvolvedor via `checkip.amazonaws.com` e libera a porta 22 (SSH) **apenas** para o seu IP (`/32`).
 - **Criptografia EBS**: O volume de disco da instância EC2 (8 GB gp3) é criptografado por padrão.
 - **IMDSv2 Obrigatório**: A instância exige tokens para acesso aos metadados (`http_tokens = "required"`), prevenindo vulnerabilidades SSRF.
+- **Princípio do Menor Privilégio (PoLP)**: O usuário IAM que executa o Terraform utiliza uma política personalizada contendo apenas as permissões estritamente necessárias para a EC2 e recursos associados.
 - **Free Tier Friendly**: Utiliza o tipo de instância `t2.micro`.
+
+---
+
+## 🔑 Permissões IAM (Princípio do Menor Privilégio)
+
+Para executar o Terraform com segurança sem conceder permissões excessivas (como `AdministratorAccess`), utilize a política de IAM minimalista abaixo.
+
+### 📄 Política IAM em JSON (`TerraformEC2MinimalPolicy`)
+
+```json
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "TerraformEC2MinimalPermissions",
+			"Effect": "Allow",
+			"Action": [
+				"ec2:DescribeImages",
+				"ec2:DescribeKeyPairs",
+				"ec2:CreateKeyPair",
+				"ec2:ImportKeyPair",
+				"ec2:DeleteKeyPair",
+				"ec2:DescribeSecurityGroups",
+				"ec2:DescribeSecurityGroupRules",
+				"ec2:CreateSecurityGroup",
+				"ec2:DeleteSecurityGroup",
+				"ec2:AuthorizeSecurityGroupIngress",
+				"ec2:AuthorizeSecurityGroupEgress",
+				"ec2:RevokeSecurityGroupIngress",
+				"ec2:RevokeSecurityGroupEgress",
+				"ec2:DescribeInstances",
+				"ec2:DescribeInstanceAttribute",
+				"ec2:DescribeInstanceTypes",
+				"ec2:DescribeInstanceCreditSpecifications",
+				"ec2:ModifyInstanceCreditSpecification",
+				"ec2:DescribeNetworkInterfaces",
+				"ec2:DescribeNetworkInterfaceAttribute",
+				"ec2:DescribeVolumes",
+				"ec2:DescribeTags",
+				"ec2:RunInstances",
+				"ec2:TerminateInstances",
+				"ec2:CreateTags"
+			],
+			"Resource": "*"
+		}
+	]
+}
+```
+
+### 🛠️ Como Criar e Anexar a Política ao Usuário Terraform
+
+#### Método 1: Pelo Console Web da AWS
+
+1. **Acesse o IAM:** Faça login no Console AWS e navegue até **IAM** (*Identity and Access Management*).
+2. **Criar Política:**
+   - No menu esquerdo, clique em **Policies** (Políticas) > **Create policy** (Criar política).
+   - Selecione a aba **JSON**, apague o conteúdo padrão e cole o JSON da política acima.
+   - Clique em **Next** (Próximo).
+   - Defina o nome da política como `TerraformEC2MinimalPolicy` e clique em **Create policy**.
+3. **Anexar ao Usuário:**
+   - No menu esquerdo, clique em **Users** (Usuários) e selecione o usuário que executa o Terraform.
+   - Na aba **Permissions** (Permissões), clique em **Add permissions** (Adicionar permissões) > **Attach policies directly** (Anexar políticas diretamente).
+   - Busque por `TerraformEC2MinimalPolicy`, selecione-a e clique em **Add permissions**.
+
+#### Método 2: Via AWS CLI
+
+Caso prefira a linha de comando:
+
+```bash
+# 1. Criar a política na AWS
+aws iam create-policy \
+  --policy-name TerraformEC2MinimalPolicy \
+  --policy-document '{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "TerraformEC2MinimalPermissions",
+			"Effect": "Allow",
+			"Action": [
+				"ec2:DescribeImages",
+				"ec2:DescribeKeyPairs",
+				"ec2:CreateKeyPair",
+				"ec2:ImportKeyPair",
+				"ec2:DeleteKeyPair",
+				"ec2:DescribeSecurityGroups",
+				"ec2:DescribeSecurityGroupRules",
+				"ec2:CreateSecurityGroup",
+				"ec2:DeleteSecurityGroup",
+				"ec2:AuthorizeSecurityGroupIngress",
+				"ec2:AuthorizeSecurityGroupEgress",
+				"ec2:RevokeSecurityGroupIngress",
+				"ec2:RevokeSecurityGroupEgress",
+				"ec2:DescribeInstances",
+				"ec2:DescribeInstanceAttribute",
+				"ec2:DescribeInstanceTypes",
+				"ec2:DescribeInstanceCreditSpecifications",
+				"ec2:ModifyInstanceCreditSpecification",
+				"ec2:DescribeNetworkInterfaces",
+				"ec2:DescribeNetworkInterfaceAttribute",
+				"ec2:DescribeVolumes",
+				"ec2:DescribeTags",
+				"ec2:RunInstances",
+				"ec2:TerminateInstances",
+				"ec2:CreateTags"
+			],
+			"Resource": "*"
+		}
+	]
+}'
+
+# 2. Anexar a política ao seu usuário do Terraform (substitua SEU_USUARIO e SEU_ACCOUNT_ID)
+aws iam attach-user-policy \
+  --user-name SEU_USUARIO \
+  --policy-arn arn:aws:iam::SEU_ACCOUNT_ID:policy/TerraformEC2MinimalPolicy
+```
 
 ---
 
