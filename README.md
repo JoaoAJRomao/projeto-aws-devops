@@ -1,4 +1,4 @@
-# Projeto AWS DevOps: Provisionamento com Terraform & Automação com Ansible
+# Projeto AWS DevOps: Provisionamento com Terraform & Automação com Ansible.
 
 Este projeto demonstra a infraestrutura como código (IaC) e automação de gerenciamento de configuração na AWS. Ele provisiona uma instância **EC2 Ubuntu 22.04 LTS** com práticas de **Hardening de Segurança** usando **Terraform** e configura um servidor web **Nginx** usando **Ansible**.
 
