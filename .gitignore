@@ -1,0 +1,71 @@
+# ==========================================
+# Terraform
+# ==========================================
+# Local .terraform directories
+.terraform/
+
+# State files & state backup files
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Exclude sensitive variables files
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# CLI configuration files
+.terraformrc
+terraform.rc
+
+# CLI plan files (may contain sensitive variables or secrets)
+*.tfplan
+
+# ==========================================
+# Ansible
+# ==========================================
+# Ansible retry files
+*.retry
+
+# Ansible cache & logs
+.ansible/
+ansible.log
+
+# Vault password files & SSH keys / secrets
+.vault-password
+.ansible_vault*
+*vault_pass*
+*.vault_password
+*.pem
+*.key
+id_rsa
+id_rsa.pub
+
+# ==========================================
+# Python / Environment
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.env
+.env.*
+
+# ==========================================
+# IDEs & OS Files
+# ==========================================
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
